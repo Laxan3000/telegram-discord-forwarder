@@ -1,0 +1,4 @@
+from typing import Final
+
+DISCORD_MESSAGE_LENGTH_LIMIT: Final[int] = 2000
+TELEGRAM_MESSAGE_LENGTH_LIMIT: Final[int] = 4096

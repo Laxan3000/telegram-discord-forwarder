@@ -1,0 +1,3 @@
+DATABASE_NAME: str = "database"
+PENDING_TIMEOUT: int = 60 * 10
+PENDING_CHECKS_INTERVAL: float = 0.5

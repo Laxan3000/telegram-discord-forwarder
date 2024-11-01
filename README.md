@@ -1,3 +1,5 @@
+### Still in beta. The repo is public for people to see, but it's not meant for public use as of now.
+
 # Telegram <-> Discord Forwarder
 
 The main purpose of these bots is to make linking Telegram and Discord groups easier, letting Discord users read messages that are sent to the linked Telegram group and vice versa.

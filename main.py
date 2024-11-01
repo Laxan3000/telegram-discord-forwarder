@@ -1,4 +1,14 @@
 if __name__ == "__main__":
+    # Check if tokens.py exists
+    try: from tokens import TELEGRAM_TOKEN, DISCORD_TOKEN
+    except:
+        print(
+            "tokens.py is missing or some variables aren't accessible! "
+            "The bots won't run until tokens are defined!"
+        )
+        exit(1)
+    
+    
     from threading import Thread
     from src.discord import discord_bot
     from src.telegram import telegram_bot

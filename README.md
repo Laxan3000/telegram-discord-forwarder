@@ -32,6 +32,11 @@ TELEGRAM_TOKEN: str = "TELEGRAM BOT TOKEN FROM @BOTFATHER"
 - Converting Telegram's markdown to Discord's is easy enough, but the opposite isn't the case. The library currently used for this purpose doesn't distinguish escaping and spaces between markdown symbols very well.
 - Right now, there is no way to disassociate the associations if you don't do it yourself.
 
+## Goals
+
+- To make Telegram to Discord comunication seamless, so each person can use the client they want for communicating with each other;
+- Letting people share their messages across different channels/groups at once.
+
 ## Libraries used
 
 - [async_lru][al]

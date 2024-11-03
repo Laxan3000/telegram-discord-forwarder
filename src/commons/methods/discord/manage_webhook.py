@@ -144,3 +144,39 @@ async def edit_webhook_message(
             await get_or_create_webhook(channel)
         ).fetch_message(message_id)
     ).edit(content=text)
+
+
+async def delete_webhook_messages(
+    chat_id: int,
+    message_ids: list[int],
+) -> None:
+    
+    # Get the channel the message has to be deleted
+    match channel := await get_channel(chat_id):
+        # This shouldn't be the case in the first place
+        case discord.CategoryChannel() | None:
+            return
+        
+        # If the channel is a thread, take his parent
+        case discord.threads.Thread():
+            if not (channel := channel.parent):
+                return
+        
+        case discord.ForumChannel():
+            pass
+
+        # If a DM or a group, delete the message regularly
+        case discord.abc.PrivateChannel():
+            for message_id in message_ids:
+                await (await channel.fetch_message(message_id)).delete() # type: ignore
+                
+            return
+    
+    # You can't send messages to forums (as a channel) either
+    if isinstance(channel, discord.ForumChannel):
+        return
+    
+    await channel.delete_messages([
+        channel.get_partial_message(message_id)
+        for message_id in message_ids
+    ])

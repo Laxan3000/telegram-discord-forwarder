@@ -173,7 +173,7 @@ def parse_markdown(offset: int, text: str) -> TelegramContents:
     return _parse_nodes(offset, parse(text[offset:]))
 
 
-def get_wrapped(
+def get_entities_wrapped(
     suffix: str,
     text: str
 ) -> tuple[list[str], list[list[MessageEntity]], LinkPreviewOptions]:

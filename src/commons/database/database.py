@@ -18,9 +18,9 @@ def lookup_discord_chats(telegram_chat_id: int) -> set[int]:
 def lookup_discord_messages(
     telegram_chat_id: int,
     telegram_message_id: int
-) -> dict[int, tuple[int, ...]]:
+) -> dict[int, list[int]]:
     return {
-        chat_id: tuple(chain(*cursor.execute(
+        chat_id: list(chain(*cursor.execute(
                 """
                 SELECT DiscordMessageID FROM MessageAssociations
                 WHERE TelegramChatID = ?
@@ -64,9 +64,9 @@ def lookup_telegram_chats(discord_chat_id: int) -> set[int]:
 def lookup_telegram_messages(
     discord_chat_id: int,
     discord_message_id: int
-) -> dict[int, tuple[int, ...]]:
+) -> dict[int, list[int]]:
     return {
-        chat_id: tuple(chain(*cursor.execute(
+        chat_id: list(chain(*cursor.execute(
                 """
                 SELECT TelegramMessageID FROM MessageAssociations
                 WHERE DiscordChatID = ?
@@ -243,6 +243,33 @@ def delete_old_message_associations() -> None:
         DELETE FROM MessageAssociations
         WHERE (unixepoch() - ForwardDateUnix) >= 172800;
         """
+    )
+    connection.commit()
+    
+
+def delete_message_associations(
+    discord_chat_id: int,
+    telegram_chat_id: int,
+    message_ids: list[int]
+) -> None:
+    if not message_ids:
+        return
+    
+    cursor.execute(
+        """
+        DELETE FROM MessageAssociations
+        WHERE DiscordChatID = ?
+        AND TelegramChatID = ?
+        AND (DiscordMessageID {0} OR TelegramMessageID {0});
+        """.format(
+            f"IN ({', '.join(str(id) for id in message_ids)})"
+            if len(message_ids) > 1
+            else f"= {message_ids[0]}"
+        ),
+        [
+            discord_chat_id,
+            telegram_chat_id
+        ]
     )
     connection.commit()
 

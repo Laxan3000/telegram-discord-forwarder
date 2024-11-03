@@ -12,7 +12,7 @@ from textwrap import wrap
 from ..commons import commons, signals
 from ..commons.database import database
 from ..commons.methods.parse_telegram_entities import parse_markdown
-from ..commons.methods.discord.manage_webhook import edit_webhook_message, get_channel
+from ..commons.methods.discord.manage_webhook import edit_webhook_message, get_channel, delete_webhook_messages
 from ..commons.methods.discord.get_channel_name import get_channel_name
 from ..commons.methods.discord.forward_new_messages import forward_new_messages
 
@@ -81,21 +81,6 @@ async def associate(message: Message, command: CommandObject) -> None:
         reply_to_message_id=(reply or message).message_id
     )
 
-    # # Send the message to discord too
-    # if getattr(
-    #     discord_chat := asyncio.run_coroutine_threadsafe(
-    #         coro=get_channel(discord_chat_id),
-    #         loop=commons.discord_loop
-    #     ).result(), 
-    #     "send"
-    # ):
-    #     asyncio.run_coroutine_threadsafe(
-    #         coro=discord_chat.send( # type: ignore
-    #             content=f"Association with ***{chat_name}*** went smoothly!"
-    #         ),
-    #         loop=commons.discord_loop
-    #     )
-
 
 @dp.message()
 async def on_message(message: Message) -> None:
@@ -138,7 +123,7 @@ async def on_message_edit(edited_message: Message) -> None:
     or not (from_user := edited_message.from_user):
         return
     
-    associations: dict[int, tuple[int, ...]] = database.lookup_discord_messages(
+    associations: dict[int, list[int]] = database.lookup_discord_messages(
         telegram_chat_id=edited_message.chat.id,
         telegram_message_id=edited_message.message_id
     )
@@ -161,28 +146,43 @@ async def on_message_edit(edited_message: Message) -> None:
         break_long_words=False,
         replace_whitespace=False
     )
+    messages_to_edit: int = len(wrapped_text)
     
-    for chat_id, message_ids in associations.items():        
-        offset: int = 0
+    for chat_id, message_ids in associations.items():
         for i, message_id in enumerate(message_ids, 0):
-            offset = DISCORD_MESSAGE_LENGTH_LIMIT * i
-            
-            result = asyncio.run_coroutine_threadsafe(
-                coro=edit_webhook_message(
-                    telegram_user=from_user,
-                    chat_id=chat_id,
-                    message_id=message_id,
-                    text=wrapped_text[i],
-                    first_call=offset == 0
-                ),
-                loop=commons.discord_loop
-            ).result()
+            # If the new message is shorter in messages length
+            if i >= messages_to_edit:
+                messages_to_delete: list[int] = message_ids[i:]
+                
+                asyncio.run_coroutine_threadsafe(
+                    coro=delete_webhook_messages(chat_id, messages_to_delete),
+                    loop=commons.discord_loop
+                )
+                
+                database.delete_message_associations(
+                    discord_chat_id=chat_id,
+                    telegram_chat_id=edited_message.chat.id,
+                    message_ids=messages_to_delete
+                )
+                
+                break
+            else:
+                result = asyncio.run_coroutine_threadsafe(
+                    coro=edit_webhook_message(
+                        telegram_user=from_user,
+                        chat_id=chat_id,
+                        message_id=message_id,
+                        text=wrapped_text[i],
+                        first_call=i == 0
+                    ),
+                    loop=commons.discord_loop
+                ).result()
         else:
             if len(message_ids) >= len(wrapped_text):
                 break
             
             # If the edit message is longer than what Discord can handle (probable)
-            
+
             asyncio.run_coroutine_threadsafe(
                 coro=forward_new_messages(
                     text="".join(wrapped_text[i:]), # type: ignore

@@ -7,7 +7,7 @@ from uuid import uuid4
 from ..commons import commons, signals
 from ..commons.database import database
 from ..telegram import telegram_bot
-from ..commons.methods.parse_discord_entities import get_wrapped
+from ..commons.methods.parse_discord_entities import get_entities_wrapped
 from ..commons.methods.discord.get_channel_name import get_channel_name
 
 bot = Bot(
@@ -67,16 +67,6 @@ async def associate(ctx: Context, *args: str) -> None:
         content=f"Association with ***{chat_name}*** went smoothly!",
         reference=reply or ctx.message
     )
-    
-    # # Send the message to telegram too
-    # asyncio.run_coroutine_threadsafe(
-    #     coro=telegram_bot.bot.send_message(
-    #         chat_id=telegram_chat_id,
-    #         text=f"Association with <b><i>{chat_name}</i></b> went smoothly!",
-    #         parse_mode="HTML"
-    #     ),
-    #     loop=commons.telegram_loop
-    # )
 
 
 @bot.event
@@ -96,7 +86,7 @@ async def on_message(message: discord.Message) -> None:
         return
     
     
-    wrapped_text, entities, link_preview_options = get_wrapped(
+    wrapped_text, entities, link_preview_options = get_entities_wrapped(
         suffix=f"{message.author.global_name}\n",
         text=message.content
     )
@@ -139,7 +129,7 @@ async def on_raw_message_edit(payload: discord.RawMessageUpdateEvent) -> None:
     if message["author"].get("bot", False):
         return
 
-    associations: dict[int, tuple[int, ...]] = database.lookup_telegram_messages(
+    associations: dict[int, list[int]] = database.lookup_telegram_messages(
         discord_chat_id=payload.channel_id,
         discord_message_id=payload.message_id
     )
@@ -148,24 +138,45 @@ async def on_raw_message_edit(payload: discord.RawMessageUpdateEvent) -> None:
     if not associations:
         return
     
-    wrapped_text, entities, link_preview_options = get_wrapped(
+    wrapped_text, entities, link_preview_options = get_entities_wrapped(
         suffix=f"{message["author"].get("global_name")} (edited)\n",
         text=message["content"]
     )
+    messages_to_edit: int = len(wrapped_text)
     
     # Lookup all the chats the message has to be edited
     for chat_id, message_ids in associations.items():
         for i, message_id in enumerate(message_ids, 0):
-            asyncio.run_coroutine_threadsafe(
-                coro=telegram_bot.bot.edit_message_text(
-                    text=wrapped_text[i],
-                    chat_id=chat_id,
-                    message_id=message_id,
-                    entities=entities[i],
-                    link_preview_options=link_preview_options
-                ),
-                loop=commons.telegram_loop
-            )
+            # If the new message is shorter in messages length
+            if i >= messages_to_edit:
+                messages_to_delete: list[int] = message_ids[i:]
+                
+                asyncio.run_coroutine_threadsafe(
+                    coro=telegram_bot.bot.delete_messages(
+                        chat_id=chat_id,
+                        message_ids=messages_to_delete
+                    ),
+                    loop=commons.telegram_loop
+                )
+                
+                database.delete_message_associations(
+                    discord_chat_id=payload.channel_id,
+                    telegram_chat_id=chat_id,
+                    message_ids=messages_to_delete
+                )
+                
+                break
+            else:
+                asyncio.run_coroutine_threadsafe(
+                    coro=telegram_bot.bot.edit_message_text(
+                        text=wrapped_text[i],
+                        chat_id=chat_id,
+                        message_id=message_id,
+                        entities=entities[i],
+                        link_preview_options=link_preview_options
+                    ),
+                    loop=commons.telegram_loop
+                )
         else:
             if len(message_ids) >= len(wrapped_text):
                 break
@@ -173,7 +184,7 @@ async def on_raw_message_edit(payload: discord.RawMessageUpdateEvent) -> None:
             # If the edit message is longer than what Telegram can handle (unprobable)
             
             # Split text if it's too long.
-            for i, content in enumerate(wrapped_text[TELEGRAM_MESSAGE_LENGTH_LIMIT * i:], i): # type: ignore
+            for i, content in enumerate(wrapped_text[i:], i): # type: ignore
                 result = asyncio.run_coroutine_threadsafe(
                     coro=telegram_bot.bot.send_message(
                         chat_id=chat_id,

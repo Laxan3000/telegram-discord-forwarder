@@ -16,8 +16,7 @@ There currently aren't many integrity checks either, as I'm still developing the
 ## Currently supported features
 
 - Sending messages to one client to the other, splitting the message in case it doesn't fit in the client's message length limit;
-- Editing sent messages and sending new ones in case it doesn't fit the client's message length limit;
-    - Right now, if the edited message returns between the limit, the new send message on the other client remains there (probably) unedited.
+- Editing sent messages and sending new ones in case it doesn't fit the client's message length limit.
 
 ## Starting the bots
 
@@ -25,8 +24,8 @@ Before starting the script, create a `tokens.py` file in the same folder `main.p
 Creating a custom class to hide your tokens is an option (as long as these same variables are used), but to keep things simple, you can arrange it like this:
 
 ```python
-DISCORD_TOKEN: str = "DISCORD BOT TOKEN FROM DISCORD DEVELOPERS"
-TELEGRAM_TOKEN: str = "TELEGRAM BOT TOKEN FROM @BOTFATHER"
+DISCORD_TOKEN = "DISCORD BOT TOKEN FROM DISCORD DEVELOPERS"
+TELEGRAM_TOKEN = "TELEGRAM BOT TOKEN FROM @BOTFATHER"
 ```
 
 ## Known problems

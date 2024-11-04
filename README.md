@@ -6,7 +6,7 @@ The main purpose of these bots is to make linking Telegram and Discord groups ea
 
 For this to happen, send `/associate` in one of your DGC (DM / Group / Channel) and use the command the bot tells you to send to link the group/channel you'd like to link.
 
-Discord's side will tend to use webhoooks for channels and his messages for private conversations or groups. Telegram doesn't have this feature, so it will always use plain text.
+Discord's side will tend to use webhoooks for channels and his messages for private conversations or groups. Telegram doesn't have this feature, so it will always use his messages.
 
 ## Please note
 
@@ -45,6 +45,12 @@ TELEGRAM_TOKEN = "TELEGRAM BOT TOKEN FROM @BOTFATHER"
 - [discord.py][dp]
 - (david-why's) [discord-markdown-ast-parser][dmap]
     - This is the least "buggy" I was able to find.
+
+To install those at once, simply run:
+
+```bash
+pip install async-lru aiogram discord.py git+[damp].git#egg=discord-markdown-ast-parser
+```
 
 [al]: https://github.com/aio-libs/async-lru
 [ag]: https://github.com/aiogram/aiogram

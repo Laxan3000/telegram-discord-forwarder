@@ -49,7 +49,7 @@ TELEGRAM_TOKEN = "TELEGRAM BOT TOKEN FROM @BOTFATHER"
 To install those at once, simply run:
 
 ```bash
-pip install async-lru aiogram discord.py git+[damp].git#egg=discord-markdown-ast-parser
+pip install async-lru aiogram discord.py git+https://github.com/david-why/discord-markdown-ast-parser.git#egg=discord-markdown-ast-parser
 ```
 
 [al]: https://github.com/aio-libs/async-lru

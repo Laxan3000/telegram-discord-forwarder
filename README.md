@@ -28,6 +28,8 @@ DISCORD_TOKEN = "DISCORD BOT TOKEN FROM DISCORD DEVELOPERS"
 TELEGRAM_TOKEN = "TELEGRAM BOT TOKEN FROM @BOTFATHER"
 ```
 
+Then, simply run `main.py`
+
 ## Known problems
 
 - Converting Telegram's markdown to Discord's is easy enough, but the opposite isn't the case. The library currently used for this purpose doesn't distinguish escaping and spaces between markdown symbols very well.
@@ -40,7 +42,7 @@ TELEGRAM_TOKEN = "TELEGRAM BOT TOKEN FROM @BOTFATHER"
 
 ## Libraries used
 
-- [async_lru][al]
+- [async-lru][al]
 - [aiogram][ag]
 - [discord.py][dp]
 - (david-why's) [discord-markdown-ast-parser][dmap]

@@ -9,11 +9,18 @@ async def get_avatar(user: User) -> Optional[str]:
     if not user.bot:
         return None
 
-    # Get the profile photos of the user
-    pfps = await user.bot.get_user_profile_photos(user.id, 0, 1)
-    
-    # Get the file from the file id of the current profile picture of the user
-    file_path = (await user.bot.get_file(pfps.photos[0][0].file_id)).file_path
+    file_path: Optional[str] = None
+
+    try:
+        # Get the profile photos of the user
+        pfps = await user.bot.get_user_profile_photos(user.id, 0, 1)
+        
+        # Get the file from the file id of the current profile picture of the user
+        file_path = (await user.bot.get_file(pfps.photos[0][0].file_id)).file_path
+    except:
+        # If, for any reason that can also be the user not having
+        # set a profile photo, it fails, then return no avatar.
+        return None
     
     # Return the file path as an URL.
     # Discord will then download the image from the url and upload

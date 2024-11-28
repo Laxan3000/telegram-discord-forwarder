@@ -59,7 +59,7 @@ async def associate(ctx: Context, *args: str) -> None:
             return
     
         chat_name: str = asyncio.run_coroutine_threadsafe(
-            coro=telegram_bot.bot.get_chat(database.get_chat_id(uuid)[1]),
+            coro=telegram_bot.bot.get_chat(database.get_chat_ids(uuid)[1]),
             loop=commons.telegram_loop
         ).result().full_name
     

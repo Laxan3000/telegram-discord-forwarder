@@ -294,7 +294,7 @@ def delete_selected_pending_associations(
     connection.commit()
     
     
-def get_chat_id(uuid: str) -> tuple[int, int]:
+def get_chat_ids(uuid: str) -> tuple[int, int]:
     """
     0 - Discord; 1 - Telegram
     """

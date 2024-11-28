@@ -69,7 +69,7 @@ async def associate(message: Message, command: CommandObject) -> None:
     
         try:
             chat_name: str = get_channel_name(asyncio.run_coroutine_threadsafe(
-                coro=get_channel(database.get_chat_id(uuid)[0]),
+                coro=get_channel(database.get_chat_ids(uuid)[0]),
                 loop=commons.discord_loop
             ).result())
         except:

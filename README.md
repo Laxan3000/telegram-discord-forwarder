@@ -51,7 +51,7 @@ Then, simply run `main.py`
 To install those at once, simply run:
 
 ```bash
-pip install async-lru aiogram discord.py git+https://github.com/david-why/discord-markdown-ast-parser.git#egg=discord-markdown-ast-parser
+pip install -r requirements.txt
 ```
 
 [al]: https://github.com/aio-libs/async-lru

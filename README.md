@@ -1,4 +1,4 @@
-### Still in beta. The repo is public for people to see, but it's not meant for public use as of now.
+### Still in beta. The repo is public for people to see, but it's not meant for public use as of now. Take it as a proof of concept.
 
 # Telegram <-> Discord Forwarder
 

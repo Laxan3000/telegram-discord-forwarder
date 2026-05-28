@@ -58,7 +58,6 @@ def parse_markdown(
                 text_slice += f"```{entity.language}\n{entity_text}```"
                 
             case MessageEntityType.TEXT_LINK:
-                print(disable_link_preview)
                 text_slice += (
                     f"[{entity_text}](<{entity.url}>)"
                     if disable_link_preview
